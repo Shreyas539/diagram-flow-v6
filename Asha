@@ -1,0 +1,96 @@
+import { createSlice } from "@reduxjs/toolkit";
+
+const usersSlice = createSlice({
+  name: "users",
+  initialState: {
+    nodes: [],
+    edges: [],
+    undostack: [],
+    redostack: [],
+    loading: "idle",
+  },
+  reducers: {
+    setNodes(state, actions) {
+      state.nodes = actions.payload;
+    },
+
+    setEdges(state, actions) {
+      state.edges = actions.payload;
+    },
+
+    setNodesAndEdges(state) {
+      //   const { nodes, edges } = action.payload;
+      if (state.undostack.length === 0) return;
+
+      // Push current state to undo stack
+      state.undostack.push({
+        nodes: state.nodes,
+        edges: state.edges,
+      });
+
+      // Clear redo stack on new change
+      state.redostack = [];
+
+      // Apply new nodes and edges
+      //   state.nodes = nodes;
+      //   state.edges = edges;
+    },
+
+    undo(state) {
+      if (state.undostack.length === 0) return;
+
+      // Save current state to redo stack
+      state.redostack.push({
+        nodes: state.nodes,
+        edges: state.edges,
+      });
+
+      // Restore from undo stack
+      const prev = state.undostack.pop();
+      state.nodes = prev.nodes;
+      state.edges = prev.edges;
+    },
+
+    redo(state) {
+      if (state.redostack.length === 0) return;
+
+      // Save current state to undo stack
+      state.undostack.push({
+        nodes: state.nodes,
+        edges: state.edges,
+      });
+
+      // Restore from redo stack
+      const next = state.redostack.pop();
+      state.nodes = next.nodes;
+      state.edges = next.edges;
+    },
+
+    resetHistory(state) {
+      state.undostack = [];
+      state.redostack = [];
+    },
+  },
+});
+
+export const {
+  setNodesAndEdges,
+  undo,
+  redo,
+  resetHistory,
+  setNodes,
+  setEdges,
+} = usersSlice.actions;
+
+export default usersSlice.reducer;
+
+useEffect(() => {
+  dispatch(setNodes(flowData.nodes));
+  dispatch(setEdges(flowData.edges));
+}, []);
+
+const handleLogin = () => {
+  dispatch(setUser({ name: "Asha", role: "admin" }));
+
+  dispatch(setNodesAndEdges());
+};
