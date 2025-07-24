@@ -1,0 +1,119 @@
+import React, { useState } from 'react';
+import { Box, Collapse, Flex, Icon, Text } from '@chakra-ui/react';
+import {
+  ChevronDownIcon,
+  ChevronRightIcon,
+  AttachmentIcon,
+} from '@chakra-ui/icons';
+import { FaFolder as FolderIconFallback } from 'react-icons/fa';
+
+// TreeItem Component
+const TreeItem = ({ node, selectedId, setSelectedId, child = false }) => {
+  const isBranch = node.children && node.children.length > 0;
+  const [isOpen, setIsOpen] = useState(false);
+  const toggle = () => setIsOpen(!isOpen);
+  const isSelected = selectedId === node.id;
+  // pl={4}
+  return (
+    <Box>
+      <Flex
+        align="center"
+        cursor="pointer"
+        onClick={() => {
+          if (isBranch) toggle();
+          setSelectedId(node.id);
+        }}
+        height={10}
+        bg={isSelected ? 'blue.100' : 'transparent'}
+        borderRadius="md"
+        px={2}
+        _hover={{ bg: 'blue.50' }}
+        //marginLeft={child ? '7px' : '0px'}
+      >
+        {isBranch ? (
+          <Icon
+            as={isOpen ? ChevronDownIcon : ChevronRightIcon}
+            boxSize={4}
+            mr={2}
+            ml={child ? 22 : 0}
+          />
+        ) : (
+          <Box boxSize={4} mr={2} />
+        )}{' '}
+        <Icon
+          as={isBranch ? FolderIconFallback : AttachmentIcon}
+          boxSize={4}
+          mr={2}
+          ml={!isBranch ? 22 : 0}
+        />{' '}
+        <Text fontSize="xl" mb={0} color={isOpen ? 'blue' : 'black'}>
+          {' '}
+          {node.name}{' '}
+        </Text>{' '}
+      </Flex>{' '}
+      {isBranch && (
+        <Collapse in={isOpen} animateOpacity>
+          {' '}
+          {node.children.map((child) => (
+            <TreeItem
+              key={child.id}
+              node={child}
+              selectedId={selectedId}
+              setSelectedId={setSelectedId}
+              child={true}
+            />
+          ))}{' '}
+        </Collapse>
+      )}{' '}
+    </Box>
+  );
+};
+
+// TreeView Component (root)
+const TreeView = ({ data }) => {
+  const [selectedId, setSelectedId] = useState(null);
+
+  const treeData = {
+    id: 1,
+    name: 'Root',
+    children: [
+      {
+        id: 2,
+        name: 'Folder A',
+        children: [
+          { id: 3, name: 'File A1' },
+          { id: 4, name: 'File A2' },
+        ],
+      },
+      {
+        id: 5,
+        name: 'Folder B',
+        children: [
+          { id: 6, name: 'File B1' },
+          { id: 7, name: 'File B2' },
+          {
+            id: 8,
+            name: 'B2',
+            children: [
+              { id: 9, name: 'File B1' },
+              { id: 10, name: 'File B2' },
+            ],
+          },
+        ],
+      },
+    ],
+  };
+
+  return (
+    <Box padding={18}>
+      <TreeItem
+        node={treeData}
+        selectedId={selectedId}
+        setSelectedId={setSelectedId}
+      />{' '}
+    </Box>
+  );
+};
+
+export default TreeView;
+
